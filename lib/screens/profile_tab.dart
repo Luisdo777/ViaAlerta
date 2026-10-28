@@ -41,9 +41,11 @@ class ProfileTab extends StatelessWidget {
             label: 'Sair da conta',
             borderColor: AppColors.orangeText,
             textColor: AppColors.orangeText,
-            onPressed: () {
-              authService.signOut();
-              Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+            onPressed: () async {
+              await authService.signOut();
+              if (context.mounted) {
+                Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+              }
             },
           ),
         ],

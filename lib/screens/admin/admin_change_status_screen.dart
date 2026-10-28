@@ -27,16 +27,24 @@ class _AdminChangeStatusScreenState extends State<AdminChangeStatusScreen> {
 
   Future<void> _save() async {
     setState(() => _saving = true);
-    await occurrenceRepository.updateStatus(
-      widget.occurrenceId,
-      _newStatus,
-      note: _note.text,
-    );
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Status atualizado com sucesso.')),
-    );
-    Navigator.pop(context);
+    try {
+      await occurrenceRepository.updateStatus(
+        widget.occurrenceId,
+        _newStatus,
+        note: _note.text,
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Status atualizado com sucesso.')),
+      );
+      Navigator.pop(context);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _saving = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Não foi possível salvar. Tente novamente.')),
+      );
+    }
   }
 
   @override

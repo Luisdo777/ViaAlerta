@@ -33,14 +33,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _loading = true);
-    await authService.register(
-      name: _name.text,
-      email: _email.text,
-      phone: _phone.text,
-      password: _password.text,
-    );
-    if (!mounted) return;
-    Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+    try {
+      await authService.register(
+        name: _name.text,
+        email: _email.text,
+        phone: _phone.text,
+        password: _password.text,
+      );
+      if (!mounted) return;
+      Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _loading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Não foi possível criar a conta: ${e.toString()}')),
+      );
+    }
   }
 
   @override

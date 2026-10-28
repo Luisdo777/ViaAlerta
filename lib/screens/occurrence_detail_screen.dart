@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 
 import '../core/app_theme.dart';
@@ -152,10 +150,24 @@ class OccurrenceDetailScreen extends StatelessWidget {
                             separatorBuilder: (_, __) => const SizedBox(width: 10),
                             itemBuilder: (context, i) => ClipRRect(
                               borderRadius: BorderRadius.circular(12),
-                              child: Image.file(File(o.photos[i]),
+                              child: Image.network(o.photos[i],
                                   width: 84,
                                   height: 84,
                                   fit: BoxFit.cover,
+                                  loadingBuilder: (context, child, progress) =>
+                                      progress == null
+                                          ? child
+                                          : const SizedBox(
+                                              width: 84,
+                                              height: 84,
+                                              child: Center(
+                                                child: SizedBox(
+                                                  width: 20,
+                                                  height: 20,
+                                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                                ),
+                                              ),
+                                            ),
                                   errorBuilder: (_, __, ___) => Container(
                                         width: 84,
                                         height: 84,

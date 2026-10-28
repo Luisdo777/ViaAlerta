@@ -113,6 +113,63 @@ Em seguida, adicione as permissões abaixo e rode `flutter pub get` e `flutter r
 <string>Usamos suas fotos para anexar à ocorrência.</string>
 ```
 
+## Backend: Supabase
+
+O app usa o [Supabase](https://supabase.com) (PostgreSQL) para autenticação, banco
+de dados e armazenamento das fotos. O esquema completo está em
+`supabase/schema.sql`.
+
+### Configurar um projeto do zero
+
+1. Crie uma conta e um projeto em [supabase.com](https://supabase.com) (plano gratuito).
+2. No painel do projeto, vá em **SQL Editor > New query**, cole todo o conteúdo
+   de `supabase/schema.sql` e clique em **Run**. Isso cria as tabelas, as regras
+   de segurança (RLS) e a geração automática do número de protocolo.
+3. Vá em **Storage > New bucket**, crie um bucket chamado `occurrence-photos` e
+   marque a opção **Public bucket** (as fotos precisam ser lidas sem login).
+4. Vá em **Authentication > Providers > Email** e desative **Confirm email**,
+   para simplificar os testes (sem isso, cada cadastro exigiria clicar num link
+   de confirmação por e-mail).
+5. Vá em **Project Settings > API** e copie a **Project URL** e a chave
+   **anon public**.
+6. Copie `lib/core/supabase_config.example.dart` para `lib/core/supabase_config.dart`
+   e cole esses dois valores:
+
+   ```dart
+   class SupabaseConfig {
+     static const url = 'https://SEU-PROJETO.supabase.co';
+     static const anonKey = 'SUA-CHAVE-ANON-PUBLICA';
+   }
+   ```
+
+   Esse arquivo não deve ir para o Git (veja o `.gitignore`), já que o
+   repositório deste projeto é público.
+
+7. Rode `flutter pub get` e depois `flutter run`.
+
+### Criar um usuário administrador
+
+Não existe cadastro de admin dentro do app (só o cidadão se cadastra). Para
+criar um:
+
+1. No painel do Supabase, **Authentication > Users > Add user**, preencha e-mail
+   e senha e marque **Auto Confirm User**.
+2. Copie o **UUID** desse usuário, mostrado na mesma tela.
+3. No **SQL Editor**, rode (trocando o valor):
+
+   ```sql
+   update public.profiles set role = 'admin' where id = 'COLE-O-UUID-AQUI';
+   ```
+
+4. No app, use esse e-mail e senha na tela "Acesso administrativo".
+
+### Limitação desta versão
+
+O login do cidadão e o do admin usam a mesma sessão do Supabase Auth. Se você
+entrar como cidadão e, no mesmo aparelho, entrar como admin, a sessão anterior
+é substituída. Para testar os dois perfis ao mesmo tempo, use dois aparelhos
+(ou um aparelho físico e um emulador) com contas diferentes.
+
 ## Estrutura do código
 
 ```
@@ -127,19 +184,14 @@ lib/
     └── admin/                painel administrativo
 ```
 
-## O que ainda é simulado
+## O que ainda não existe
 
-Os dados ficam só em memória e somem ao fechar o app:
-
-- `lib/services/auth_service.dart`: login e cadastro do cidadão.
-- `lib/services/admin_auth_service.dart`: login do painel administrativo.
-- `lib/services/occurrence_repository.dart`: ocorrências de exemplo, criação, mudança de status, encaminhamento e observações.
-
-Para o sistema real (autenticação, banco de dados, notificações), troque esses
-três arquivos por chamadas ao backend. As telas não precisam mudar.
+- **Notificações push** quando o status de uma ocorrência muda.
+- **Recuperação de senha** (o link "Esqueceu sua senha?" ainda só avisa que a função não está pronta).
+- **Papel de triagem por convite**: hoje, tornar alguém admin exige rodar um comando SQL manualmente (veja acima).
 
 ## Antes de publicar
 
 - Os tiles públicos do OpenStreetMap têm política de uso limitada; em produção use um provedor de mapas próprio ou contratado.
-- As fotos hoje ficam só no aparelho; será preciso enviá-las a um armazenamento no backend.
-- O acesso administrativo precisa de autenticação real com papel de triagem. Do jeito que está, qualquer pessoa entra no painel.
+- Desative "Confirm email" só serve para facilitar os testes; em produção, reative a confirmação por e-mail em Authentication > Providers.
+- O repositório deste projeto é público; nunca commite o arquivo `lib/core/supabase_config.dart` nem chaves do tipo `service_role` (só a `anon` é segura para o app).

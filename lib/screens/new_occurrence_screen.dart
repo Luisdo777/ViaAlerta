@@ -152,24 +152,36 @@ class _NewOccurrenceScreenState extends State<NewOccurrenceScreen> {
       _snack('Marque a localização da ocorrência no mapa.');
       return;
     }
-    setState(() => _submitting = true);
-    final resolved = _resolved ?? await locationService.addressFor(_position!);
     final user = authService.user;
-    final created = await occurrenceRepository.create(
-      type: _type!,
-      description: _description.text.trim(),
-      position: _position!,
-      address: resolved.address,
-      cityLine: resolved.cityLine,
-      photos: List.of(_photos),
-      citizenName: user?.name ?? 'Cidadão',
-      citizenEmail: user?.email ?? '-',
-    );
-    if (!mounted) return;
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute<void>(builder: (_) => SuccessScreen(protocol: created.id)),
-    );
+    if (user == null) {
+      _snack('Sua sessão expirou. Entre novamente para registrar a ocorrência.');
+      return;
+    }
+    setState(() => _submitting = true);
+    try {
+      final resolved = _resolved ?? await locationService.addressFor(_position!);
+      final created = await occurrenceRepository.create(
+        type: _type!,
+        description: _description.text.trim(),
+        position: _position!,
+        address: resolved.address,
+        cityLine: resolved.cityLine,
+        localPhotoPaths: List.of(_photos),
+        citizenId: user.id,
+        citizenName: user.name,
+        citizenEmail: user.email,
+      );
+      if (!mounted) return;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute<void>(builder: (_) => SuccessScreen(protocol: created.id)),
+      );
+    } catch (e) {
+      if (mounted) {
+        setState(() => _submitting = false);
+        _snack('Não foi possível enviar a ocorrência. Tente novamente.');
+      }
+    }
   }
 
   @override

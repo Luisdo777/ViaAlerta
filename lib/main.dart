@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/app_theme.dart';
+import 'core/supabase_config.dart';
 import 'screens/admin/admin_login_screen.dart';
 import 'screens/admin/admin_shell.dart';
 import 'screens/home_shell.dart';
@@ -8,8 +10,12 @@ import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
 import 'screens/welcome_screen.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Supabase.initialize(
+    url: SupabaseConfig.url,
+    anonKey: SupabaseConfig.anonKey,
+  );
   runApp(const ViaAlertaApp());
 }
 

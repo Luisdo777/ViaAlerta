@@ -63,9 +63,11 @@ class AdminProfileTab extends StatelessWidget {
             label: 'Sair do painel',
             borderColor: AppColors.orangeText,
             textColor: AppColors.orangeText,
-            onPressed: () {
-              adminAuthService.signOut();
-              Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+            onPressed: () async {
+              await adminAuthService.signOut();
+              if (context.mounted) {
+                Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+              }
             },
           ),
         ],

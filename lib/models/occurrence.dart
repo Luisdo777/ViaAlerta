@@ -50,6 +50,7 @@ class HistoryEntry {
 
 class Occurrence {
   const Occurrence({
+    required this.recordId,
     required this.id,
     required this.type,
     required this.description,
@@ -65,7 +66,11 @@ class Occurrence {
     this.department,
   });
 
-  /// Número de protocolo, ex.: #2024-000123
+  /// Identificador interno (uuid) da linha no banco de dados.
+  /// Usado só pelo repositório para fazer updates — as telas não precisam dele.
+  final String recordId;
+
+  /// Número de protocolo mostrado ao usuário, ex.: #2024-000123
   final String id;
   final OccurrenceType type;
   final String description;
@@ -75,6 +80,8 @@ class Occurrence {
   final OccurrenceStatus status;
   final DateTime createdAt;
   final List<HistoryEntry> history;
+
+  /// URLs das fotos (Supabase Storage) ou caminhos locais, antes do envio.
   final List<String> photos;
 
   /// Cidadão que abriu o chamado.
@@ -92,6 +99,7 @@ class Occurrence {
     ResponsibleDepartment? department,
   }) {
     return Occurrence(
+      recordId: recordId,
       id: id,
       type: type,
       description: description,

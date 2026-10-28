@@ -27,9 +27,17 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _loading = true);
-    await adminAuthService.signIn(email: _email.text, password: _password.text);
-    if (!mounted) return;
-    Navigator.pushNamedAndRemoveUntil(context, '/admin/home', (route) => false);
+    try {
+      await adminAuthService.signIn(email: _email.text, password: _password.text);
+      if (!mounted) return;
+      Navigator.pushNamedAndRemoveUntil(context, '/admin/home', (route) => false);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _loading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString().replaceFirst('Exception: ', ''))),
+      );
+    }
   }
 
   void _forgotPassword() {
